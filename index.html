@@ -1,57 +1,42 @@
-/* GAME OVER EFFECT */
+function drawHazard(h) {
 
-#gameOverPanel {
-  background:
-    radial-gradient(circle at center,
-      rgba(80, 90, 120, 0.25),
-      rgba(0, 0, 0, 0.96) 70%);
-}
+  ctx.save();
 
-.gameover-title {
-  font-size: 55px;
-  letter-spacing: 7px;
-  color: #d6dbe5;
-  text-shadow:
-    0 0 8px #8792a8,
-    0 0 25px #3b4558;
-  animation: gameOverPulse 1.2s infinite;
-}
+  ctx.shadowBlur = 25;
+  ctx.shadowColor = "#00aaff";
 
-@keyframes gameOverPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  // Blue neon outer block
+  ctx.fillStyle = "#00aaff";
 
-  50% {
-    transform: scale(1.04);
-    opacity: 0.65;
-  }
-}
+  ctx.fillRect(
+    h.x,
+    h.y,
+    h.size,
+    h.size
+  );
 
-.gameover-sub {
-  animation: gameOverFade 1.5s ease-in-out infinite alternate;
-}
+  // Bright inner block
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = "#7de8ff";
 
-@keyframes gameOverFade {
-  from {
-    opacity: 0.4;
-  }
+  ctx.fillStyle = "#62dcff";
 
-  to {
-    opacity: 1;
-  }
-}
+  ctx.fillRect(
+    h.x + 5,
+    h.y + 5,
+    h.size - 10,
+    h.size - 10
+  );
 
-.shake {
-  animation: screenShake 0.45s;
-}
+  // Dark center
+  ctx.fillStyle = "#10263a";
 
-@keyframes screenShake {
-  0% { transform: translate(0, 0); }
-  20% { transform: translate(-8px, 5px); }
-  40% { transform: translate(8px, -5px); }
-  60% { transform: translate(-5px, -3px); }
-  80% { transform: translate(5px, 3px); }
-  100% { transform: translate(0, 0); }
+  ctx.fillRect(
+    h.x + h.size * 0.25,
+    h.y + h.size * 0.25,
+    h.size * 0.5,
+    h.size * 0.5
+  );
+
+  ctx.restore();
 }
