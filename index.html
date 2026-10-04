@@ -1,42 +1,80 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My First Game</title>
   <style>
     body {
       background: #111827;
       color: white;
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       text-align: center;
-      padding: 40px 10px;
+      padding: 30px;
     }
-    button {
-      padding: 15px 25px;
-      font-size: 20px;
-      border: none;
+
+    .shop {
+      max-width: 400px;
+      margin: auto;
+      background: #1f2937;
+      padding: 20px;
+      border-radius: 15px;
+    }
+
+    .item {
+      background: #374151;
+      padding: 15px;
+      margin: 10px 0;
       border-radius: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      background: #22c55e;
-      color: white;
+      font-size: 16px;
     }
   </style>
 </head>
+
 <body>
+
   <h1>🎮 My First Game</h1>
-  <p>Welcome to my game!</p>
-  <h2>Score: <span id="score">0</span></h2>
-  <button onclick="addPoint()">Click Me!</button>
+
+  <h2>🪙 Coins: <span id="coins">100</span></h2>
+
+  <div class="shop">
+    <h2>🛒 SHOP</h2>
+
+    <div class="item">
+      ⚡ Speed Boost
+      <p>50 coins</p>
+      <button onclick="buyItem(50, 'Speed Boost')">BUY</button>
+    </div>
+
+    <div class="item">
+      ❤️ Extra Life
+      <p>100 coins</p>
+      <button onclick="buyItem(100, 'Extra Life')">BUY</button>
+    </div>
+  </div>
+
+  <p id="message"></p>
 
   <script>
-    let score = 0;
+    let coins = 100;
 
-    function addPoint() {
-      score++;
-      document.getElementById("score").textContent = score;
+    function buyItem(price, item) {
+      if (coins >= price) {
+        coins -= price;
+        document.getElementById("coins").textContent = coins;
+        document.getElementById("message").textContent =
+          "✅ You bought " + item + "!";
+      } else {
+        document.getElementById("message").textContent =
+          "❌ Not enough coins!";
+      }
     }
   </script>
+
 </body>
 </html>
