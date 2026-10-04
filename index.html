@@ -1,12 +1,857 @@
-function drawHazard(h) {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOID RUNNER</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  background: #03060c;
+  color: white;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* LOBBY */
+
+#lobby {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background:
+    radial-gradient(circle at center, #142b48, #050913 65%, #020307);
+}
+
+.lobbyBox {
+  width: 90%;
+  max-width: 500px;
+  padding: 35px;
+  border: 1px solid #24517c;
+  border-radius: 20px;
+  background: rgba(5, 12, 24, 0.9);
+  box-shadow: 0 0 40px rgba(0, 150, 255, 0.2);
+}
+
+.logo {
+  font-size: 55px;
+  letter-spacing: 8px;
+  color: #bdeaff;
+  text-shadow:
+    0 0 10px #00aaff,
+    0 0 30px #0077ff;
+}
+
+.subtitle {
+  color: #7191ad;
+  letter-spacing: 5px;
+  margin-bottom: 25px;
+}
+
+.btn {
+  width: 100%;
+  padding: 15px;
+  margin: 7px 0;
+  border-radius: 10px;
+  background: #bdeaff;
+  color: #06101a;
+  font-size: 17px;
+}
+
+.btn:hover {
+  box-shadow: 0 0 20px #00aaff;
+}
+
+.darkBtn {
+  background: #101b2b;
+  color: white;
+  border: 1px solid #274866;
+}
+
+.info {
+  color: #7f99b2;
+  margin-top: 20px;
+  line-height: 1.8;
+}
+
+/* GAME */
+
+#gameScreen {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background:
+    radial-gradient(circle, #0c1c30, #020409 75%);
+}
+
+#gameCanvas {
+  width: min(850px, 94vw);
+  height: min(600px, 78vh);
+  background:
+    linear-gradient(rgba(0,170,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,170,255,0.025) 1px, transparent 1px),
+    #040912;
+  background-size: 40px 40px;
+  border: 1px solid #17466d;
+  box-shadow: 0 0 50px rgba(0,130,255,0.2);
+}
+
+#topbar {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(850px, 94vw);
+  display: flex;
+  justify-content: space-around;
+  padding: 11px;
+  background: rgba(3,8,16,0.9);
+  border: 1px solid #1b4569;
+  border-radius: 10px;
+  z-index: 10;
+}
+
+.stat {
+  color: #7691aa;
+  font-size: 14px;
+}
+
+.stat span {
+  color: white;
+  font-weight: bold;
+}
+
+.controls {
+  position: fixed;
+  bottom: 12px;
+  display: flex;
+  gap: 7px;
+  z-index: 10;
+}
+
+.control {
+  padding: 12px 17px;
+  border-radius: 8px;
+  background: #101d2d;
+  border: 1px solid #285071;
+  color: white;
+}
+
+.control:hover {
+  background: #18344d;
+}
+
+/* PANELS */
+
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 3, 8, 0.9);
+}
+
+.panelBox {
+  width: 90%;
+  max-width: 500px;
+  padding: 30px;
+  text-align: center;
+  background: #07101c;
+  border: 1px solid #285071;
+  border-radius: 18px;
+  box-shadow: 0 0 50px rgba(0,140,255,0.2);
+}
+
+.panelBox p {
+  color: #8da5bb;
+  line-height: 1.7;
+}
+
+/* GAME OVER */
+
+#gameOverPanel {
+  background:
+    radial-gradient(circle,
+    rgba(40,70,100,0.3),
+    rgba(0,0,0,0.97) 70%);
+}
+
+.gameOverTitle {
+  font-size: 55px;
+  letter-spacing: 6px;
+  color: #d8e8f5;
+  text-shadow:
+    0 0 10px #4b718e,
+    0 0 30px #1d3445;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%,100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.6;
+  }
+}
+
+/* WIN */
+
+#winPanel {
+  background:
+    radial-gradient(circle,
+    rgba(0,150,255,0.25),
+    rgba(0,0,0,0.95) 70%);
+}
+
+.winTitle {
+  font-size: 55px;
+  letter-spacing: 7px;
+  color: #d9f5ff;
+  text-shadow:
+    0 0 10px #00aaff,
+    0 0 35px #0066ff;
+}
+
+.keyword {
+  width: 100%;
+  padding: 13px;
+  border-radius: 8px;
+  border: 1px solid #285071;
+  background: #03070d;
+  color: white;
+  outline: none;
+  margin-bottom: 8px;
+}
+
+/* SHOP */
+
+.shopItem {
+  padding: 15px;
+  margin: 10px 0;
+  text-align: left;
+  background: #0c1827;
+  border: 1px solid #1e405c;
+  border-radius: 10px;
+}
+
+.buy {
+  float: right;
+  padding: 8px 12px;
+  border-radius: 7px;
+  background: #bdeaff;
+}
+
+/* SCREEN SHAKE */
+
+.shake {
+  animation: shake 0.45s;
+}
+
+@keyframes shake {
+  0% { transform: translate(0,0); }
+  20% { transform: translate(-8px,5px); }
+  40% { transform: translate(8px,-5px); }
+  60% { transform: translate(-5px,-3px); }
+  80% { transform: translate(5px,3px); }
+  100% { transform: translate(0,0); }
+}
+
+#flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.flash {
+  animation: flash 0.45s;
+}
+
+@keyframes flash {
+  0% { opacity: 0; }
+  25% { opacity: 0.3; }
+  100% { opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOBBY -->
+
+<div id="lobby">
+
+  <div class="lobbyBox">
+
+    <div class="logo">VOID</div>
+    <div class="subtitle">RUNNER</div>
+
+    <p>
+      Survive the void.<br>
+      Reach 1,000 score.
+    </p>
+
+    <button class="btn" onclick="startGame()">
+      PLAY
+    </button>
+
+    <button class="btn darkBtn" onclick="openShop()">
+      SHOP
+    </button>
+
+    <button class="btn darkBtn" onclick="openHowTo()">
+      HOW TO PLAY
+    </button>
+
+    <div class="info">
+      🪙 Coins: <span id="lobbyCoins">0</span><br>
+      🏆 Best: <span id="lobbyBest">0</span>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- GAME -->
+
+<div id="gameScreen" class="hidden">
+
+  <div id="topbar">
+
+    <div class="stat">
+      SCORE <span id="score">0</span>
+    </div>
+
+    <div class="stat">
+      COINS <span id="coins">0</span>
+    </div>
+
+    <div class="stat">
+      LIVES <span id="lives">3</span>
+    </div>
+
+    <div class="stat">
+      BEST <span id="best">0</span>
+    </div>
+
+  </div>
+
+  <canvas id="gameCanvas" width="850" height="600"></canvas>
+
+  <div class="controls">
+
+    <button class="control" onclick="moveLeft()">◀</button>
+
+    <button class="control" onclick="dash()">⚡ DASH</button>
+
+    <button class="control" onclick="moveRight()">▶</button>
+
+    <button class="control" onclick="pauseGame()">⏸</button>
+
+    <button class="control" onclick="returnLobby()">🏠</button>
+
+  </div>
+
+</div>
+
+
+<!-- PAUSE -->
+
+<div id="pausePanel" class="panel hidden">
+
+  <div class="panelBox">
+
+    <h2>PAUSED</h2>
+
+    <p>The void is waiting...</p>
+
+    <button class="btn" onclick="resumeGame()">
+      RESUME
+    </button>
+
+    <button class="btn darkBtn" onclick="returnLobby()">
+      LOBBY
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- GAME OVER -->
+
+<div id="gameOverPanel" class="panel hidden">
+
+  <div class="panelBox">
+
+    <div class="gameOverTitle">
+      GAME OVER
+    </div>
+
+    <p>
+      THE VOID HAS CLAIMED YOU.
+      <br>
+      <small>Try again if you dare.</small>
+    </p>
+
+    <p>
+      Score:
+      <strong id="finalScore">0</strong>
+    </p>
+
+    <button class="btn" onclick="startGame()">
+      TRY AGAIN
+    </button>
+
+    <button class="btn darkBtn" onclick="returnLobby()">
+      LOBBY
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- WIN -->
+
+<div id="winPanel" class="panel hidden">
+
+  <div class="panelBox">
+
+    <div class="winTitle">
+      YOU WON
+    </div>
+
+    <p>
+      🏆 You reached 1,000 score!
+      <br><br>
+      If you beat 1,000...
+      <br>
+      <strong>YOU OFFICIALLY BEAT MY GAME.</strong>
+    </p>
+
+    <p>🔑 Enter the Win Pass</p>
+
+    <input
+      id="keywordInput"
+      class="keyword"
+      placeholder="Enter Win Pass..."
+    >
+
+    <button class="btn" onclick="checkKeyword()">
+      CLAIM WIN
+    </button>
+
+    <p id="keywordResult"></p>
+
+    <button class="btn darkBtn" onclick="returnLobby()">
+      LOBBY
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- SHOP -->
+
+<div id="shopPanel" class="panel hidden">
+
+  <div class="panelBox">
+
+    <h2>SHOP</h2>
+
+    <p>
+      🪙 Coins:
+      <strong id="shopCoins">0</strong>
+    </p>
+
+    <div class="shopItem">
+
+      <button class="buy" onclick="buyDash()">
+        100
+      </button>
+
+      <strong>⚡ Dash Upgrade</strong>
+
+      <br>
+
+      <small>
+        Make your dash stronger.
+      </small>
+
+    </div>
+
+    <div class="shopItem">
+
+      <button class="buy" onclick="buyLife()">
+        150
+      </button>
+
+      <strong>❤️ Extra Life</strong>
+
+      <br>
+
+      <small>
+        Start games with an extra life.
+      </small>
+
+    </div>
+
+    <div class="shopItem">
+
+      <button class="buy" onclick="buyShield()">
+        200
+      </button>
+
+      <strong>🛡 Shield</strong>
+
+      <br>
+
+      <small>
+        Protect yourself from one hit.
+      </small>
+
+    </div>
+
+    <button class="btn darkBtn" onclick="closePanels()">
+      BACK
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- HOW TO PLAY -->
+
+<div id="howPanel" class="panel hidden">
+
+  <div class="panelBox">
+
+    <h2>HOW TO PLAY</h2>
+
+    <p>
+      ◀ ▶ Move<br><br>
+      ⚡ DASH to escape<br><br>
+      🔵 Avoid the blue neon blocks<br><br>
+      ❤️ Keep your lives<br><br>
+      🪙 Collect coins<br><br>
+      🏆 Reach 1,000 score<br><br>
+      🔑 Enter <strong>LUMEN</strong> to verify your win
+    </p>
+
+    <button class="btn darkBtn" onclick="closePanels()">
+      BACK
+    </button>
+
+  </div>
+
+</div>
+
+
+<div id="flash"></div>
+
+
+<script>
+
+/* =========================
+   SETTINGS
+========================= */
+
+const WIN_SCORE = 1000;
+const WIN_KEYWORD = "LUMEN";
+
+
+/* =========================
+   CANVAS
+========================= */
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+
+/* =========================
+   DATA
+========================= */
+
+let gameRunning = false;
+let paused = false;
+
+let score = 0;
+let frame = 0;
+let spawnTimer = 0;
+
+let coins =
+  Number(localStorage.getItem("voidCoins")) || 0;
+
+let best =
+  Number(localStorage.getItem("voidBest")) || 0;
+
+let dashPower =
+  Number(localStorage.getItem("dashPower")) || 1;
+
+let extraLife =
+  Number(localStorage.getItem("extraLife")) || 0;
+
+let shield =
+  Number(localStorage.getItem("shield")) || 0;
+
+let lives = 3;
+
+let hazards = [];
+
+let dashCooldown = false;
+
+
+/* =========================
+   PLAYER
+========================= */
+
+const player = {
+  x: 405,
+  y: 520,
+  width: 40,
+  height: 40,
+  speed: 8,
+  dash: 120
+};
+
+
+/* =========================
+   UI
+========================= */
+
+function updateUI() {
+
+  document.getElementById("score").textContent = score;
+  document.getElementById("coins").textContent = coins;
+  document.getElementById("lives").textContent = lives;
+  document.getElementById("best").textContent = best;
+
+  document.getElementById("lobbyCoins").textContent = coins;
+  document.getElementById("lobbyBest").textContent = best;
+
+  document.getElementById("shopCoins").textContent = coins;
+}
+
+
+/* =========================
+   START
+========================= */
+
+function startGame() {
+
+  closePanels();
+
+  document.getElementById("lobby")
+    .classList.add("hidden");
+
+  document.getElementById("gameScreen")
+    .classList.remove("hidden");
+
+  score = 0;
+  frame = 0;
+  spawnTimer = 0;
+
+  lives = 3 + extraLife;
+
+  hazards = [];
+
+  player.x = 405;
+
+  gameRunning = true;
+  paused = false;
+
+  updateUI();
+
+  requestAnimationFrame(gameLoop);
+}
+
+
+/* =========================
+   PLAYER DRAW
+========================= */
+
+function drawPlayer() {
 
   ctx.save();
 
   ctx.shadowBlur = 25;
   ctx.shadowColor = "#00aaff";
 
-  // Blue neon outer block
-  ctx.fillStyle = "#00aaff";
+  ctx.fillStyle = "#d9f5ff";
+
+  ctx.fillRect(
+    player.x,
+    player.y,
+    player.width,
+    player.height
+  );
+
+  ctx.fillStyle = "#071421";
+
+  ctx.fillRect(
+    player.x + 9,
+    player.y + 10,
+    7,
+    7
+  );
+
+  ctx.fillRect(
+    player.x + 24,
+    player.y + 10,
+    7,
+    7
+  );
+
+  ctx.restore();
+}
+
+
+/* =========================
+   MOVEMENT
+========================= */
+
+function moveLeft() {
+
+  if (!gameRunning || paused) return;
+
+  player.x -= player.speed * 3;
+
+  if (player.x < 0) {
+    player.x = 0;
+  }
+}
+
+
+function moveRight() {
+
+  if (!gameRunning || paused) return;
+
+  player.x += player.speed * 3;
+
+  if (player.x + player.width > canvas.width) {
+    player.x = canvas.width - player.width;
+  }
+}
+
+
+/* =========================
+   DASH
+========================= */
+
+function dash() {
+
+  if (!gameRunning || paused || dashCooldown) return;
+
+  dashCooldown = true;
+
+  player.x += player.dash * dashPower;
+
+  if (player.x + player.width > canvas.width) {
+    player.x = canvas.width - player.width;
+  }
+
+  setTimeout(function() {
+    dashCooldown = false;
+  }, 800);
+}
+
+
+/* =========================
+   KEYBOARD
+========================= */
+
+document.addEventListener("keydown", function(e) {
+
+  if (
+    e.key === "ArrowLeft" ||
+    e.key.toLowerCase() === "a"
+  ) {
+    moveLeft();
+  }
+
+  if (
+    e.key === "ArrowRight" ||
+    e.key.toLowerCase() === "d"
+  ) {
+    moveRight();
+  }
+
+  if (e.code === "Space") {
+    dash();
+  }
+
+  if (e.key.toLowerCase() === "p") {
+    pauseGame();
+  }
+
+});
+
+
+/* =========================
+   CREATE BLUE BLOCK
+========================= */
+
+function createHazard() {
+
+  const size = 25 + Math.random() * 25;
+
+  hazards.push({
+
+    x: Math.random() * (canvas.width - size),
+
+    y: -size,
+
+    size: size,
+
+    speed: 4.5
+  });
+}
+
+
+/* =========================
+   BLUE NEON BLOCK
+========================= */
+
+function drawHazard(h) {
+
+  ctx.save();
+
+  /* Outer blue glow */
+
+  ctx.shadowBlur = 30;
+  ctx.shadowColor = "#00aaff";
+
+  ctx.fillStyle = "#008cff";
 
   ctx.fillRect(
     h.x,
@@ -15,11 +860,12 @@ function drawHazard(h) {
     h.size
   );
 
-  // Bright inner block
-  ctx.shadowBlur = 10;
-  ctx.shadowColor = "#7de8ff";
+  /* Bright inner */
 
-  ctx.fillStyle = "#62dcff";
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = "#62e8ff";
+
+  ctx.fillStyle = "#42d9ff";
 
   ctx.fillRect(
     h.x + 5,
@@ -28,8 +874,11 @@ function drawHazard(h) {
     h.size - 10
   );
 
-  // Dark center
-  ctx.fillStyle = "#10263a";
+  /* Dark center */
+
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = "#071827";
 
   ctx.fillRect(
     h.x + h.size * 0.25,
@@ -40,3 +889,466 @@ function drawHazard(h) {
 
   ctx.restore();
 }
+
+
+/* =========================
+   COLLISION
+========================= */
+
+function collision(a, b) {
+
+  return (
+    a.x < b.x + b.size &&
+    a.x + a.width > b.x &&
+    a.y < b.y + b.size &&
+    a.y + a.height > b.y
+  );
+}
+
+
+/* =========================
+   HIT
+========================= */
+
+function hitPlayer(index) {
+
+  if (shield > 0) {
+
+    shield--;
+
+    localStorage.setItem(
+      "shield",
+      shield
+    );
+
+    hazards.splice(index, 1);
+
+    return;
+  }
+
+  lives--;
+
+  hazards.splice(index, 1);
+
+  flashScreen();
+
+  updateUI();
+
+  if (lives <= 0) {
+    gameOver();
+  }
+}
+
+
+/* =========================
+   GAME LOOP
+========================= */
+
+function gameLoop() {
+
+  if (!gameRunning) return;
+
+  if (paused) {
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  frame++;
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+
+  /* Background */
+
+  for (let i = 0; i < 25; i++) {
+
+    const x = (i * 53) % canvas.width;
+
+    const y =
+      (i * 71 + frame * 0.3)
+      % canvas.height;
+
+    ctx.fillStyle = "rgba(80,180,255,0.25)";
+
+    ctx.fillRect(x, y, 2, 2);
+  }
+
+
+  /* Difficulty = more blocks, NOT faster blocks */
+
+  let spawnRate = 55;
+
+  if (score >= 200) spawnRate = 45;
+  if (score >= 400) spawnRate = 36;
+  if (score >= 600) spawnRate = 30;
+  if (score >= 800) spawnRate = 24;
+
+
+  spawnTimer++;
+
+  if (spawnTimer >= spawnRate) {
+
+    createHazard();
+
+    spawnTimer = 0;
+
+    if (
+      score > 500 &&
+      Math.random() < 0.3
+    ) {
+      createHazard();
+    }
+
+    if (
+      score > 800 &&
+      Math.random() < 0.35
+    ) {
+      createHazard();
+    }
+  }
+
+
+  /* Hazards */
+
+  for (
+    let i = hazards.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    const h = hazards[i];
+
+    h.y += h.speed;
+
+    drawHazard(h);
+
+    if (collision(player, h)) {
+
+      hitPlayer(i);
+
+      continue;
+    }
+
+    if (h.y > canvas.height + 50) {
+
+      hazards.splice(i, 1);
+    }
+  }
+
+
+  drawPlayer();
+
+
+  /* Score */
+
+  if (frame % 6 === 0) {
+
+    score++;
+
+    if (score > best) {
+
+      best = score;
+
+      localStorage.setItem(
+        "voidBest",
+        best
+      );
+    }
+
+    updateUI();
+  }
+
+
+  /* WIN */
+
+  if (score >= WIN_SCORE) {
+
+    winGame();
+
+    return;
+  }
+
+
+  requestAnimationFrame(gameLoop);
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function gameOver() {
+
+  gameRunning = false;
+
+  document.getElementById("finalScore")
+    .textContent = score;
+
+  document.body.classList.add("shake");
+
+  flashScreen();
+
+  setTimeout(function() {
+
+    document.body.classList.remove("shake");
+
+  }, 450);
+
+  setTimeout(function() {
+
+    document.getElementById("gameOverPanel")
+      .classList.remove("hidden");
+
+  }, 500);
+}
+
+
+/* =========================
+   WIN
+========================= */
+
+function winGame() {
+
+  gameRunning = false;
+
+  coins += 500;
+
+  localStorage.setItem(
+    "voidCoins",
+    coins
+  );
+
+  updateUI();
+
+  flashScreen();
+
+  setTimeout(function() {
+
+    document.getElementById("winPanel")
+      .classList.remove("hidden");
+
+  }, 500);
+}
+
+
+/* =========================
+   WIN KEYWORD
+========================= */
+
+function checkKeyword() {
+
+  const input =
+    document.getElementById("keywordInput")
+      .value
+      .trim()
+      .toUpperCase();
+
+  const result =
+    document.getElementById("keywordResult");
+
+
+  if (input === WIN_KEYWORD) {
+
+    result.textContent =
+      "✅ WIN VERIFIED — YOU BEAT MY GAME!";
+
+  } else {
+
+    result.textContent =
+      "❌ Wrong Win Pass.";
+  }
+}
+
+
+/* =========================
+   PAUSE
+========================= */
+
+function pauseGame() {
+
+  if (!gameRunning) return;
+
+  paused = true;
+
+  document.getElementById("pausePanel")
+    .classList.remove("hidden");
+}
+
+
+function resumeGame() {
+
+  paused = false;
+
+  document.getElementById("pausePanel")
+    .classList.add("hidden");
+}
+
+
+/* =========================
+   SHOP
+========================= */
+
+function openShop() {
+
+  updateUI();
+
+  document.getElementById("shopPanel")
+    .classList.remove("hidden");
+}
+
+
+function buyDash() {
+
+  if (coins < 100) {
+    alert("Not enough coins!");
+    return;
+  }
+
+  coins -= 100;
+  dashPower++;
+
+  localStorage.setItem(
+    "voidCoins",
+    coins
+  );
+
+  localStorage.setItem(
+    "dashPower",
+    dashPower
+  );
+
+  updateUI();
+
+  alert("⚡ Dash upgraded!");
+}
+
+
+function buyLife() {
+
+  if (coins < 150) {
+    alert("Not enough coins!");
+    return;
+  }
+
+  coins -= 150;
+  extraLife++;
+
+  localStorage.setItem(
+    "voidCoins",
+    coins
+  );
+
+  localStorage.setItem(
+    "extraLife",
+    extraLife
+  );
+
+  updateUI();
+
+  alert("❤️ Extra life bought!");
+}
+
+
+function buyShield() {
+
+  if (coins < 200) {
+    alert("Not enough coins!");
+    return;
+  }
+
+  coins -= 200;
+  shield++;
+
+  localStorage.setItem(
+    "voidCoins",
+    coins
+  );
+
+  localStorage.setItem(
+    "shield",
+    shield
+  );
+
+  updateUI();
+
+  alert("🛡 Shield bought!");
+}
+
+
+/* =========================
+   HOW TO PLAY
+========================= */
+
+function openHowTo() {
+
+  document.getElementById("howPanel")
+    .classList.remove("hidden");
+}
+
+
+/* =========================
+   CLOSE
+========================= */
+
+function closePanels() {
+
+  document.querySelectorAll(".panel")
+    .forEach(function(panel) {
+      panel.classList.add("hidden");
+    });
+}
+
+
+/* =========================
+   LOBBY
+========================= */
+
+function returnLobby() {
+
+  gameRunning = false;
+  paused = false;
+
+  closePanels();
+
+  document.getElementById("gameScreen")
+    .classList.add("hidden");
+
+  document.getElementById("lobby")
+    .classList.remove("hidden");
+
+  updateUI();
+}
+
+
+/* =========================
+   FLASH
+========================= */
+
+function flashScreen() {
+
+  const flash =
+    document.getElementById("flash");
+
+  flash.classList.remove("flash");
+
+  void flash.offsetWidth;
+
+  flash.classList.add("flash");
+}
+
+
+/* =========================
+   START
+========================= */
+
+updateUI();
+
+</script>
+
+</body>
+</html>
