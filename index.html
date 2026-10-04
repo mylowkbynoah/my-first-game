@@ -4,15 +4,11 @@
   <title>Dodge Master</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
-      background: #0b0b12;
+      background: #111;
       color: white;
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       text-align: center;
     }
 
@@ -21,108 +17,92 @@
     }
 
     #info {
-      display: flex;
-      justify-content: center;
-      gap: 25px;
+      font-size: 20px;
       margin: 10px;
-      font-size: 18px;
     }
 
     canvas {
-      background: #171722;
+      background: #222;
       border: 3px solid white;
       border-radius: 10px;
-      max-width: 95%;
     }
 
     button {
-      margin: 6px;
       padding: 10px 18px;
+      margin: 6px;
+      font-size: 16px;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
       cursor: pointer;
     }
 
-    #startBtn {
-      background: #22c55e;
+    #start {
+      background: limegreen;
       color: white;
     }
 
-    #pauseBtn {
-      background: #eab308;
-      color: black;
+    #pause {
+      background: gold;
     }
 
-    #restartBtn {
-      background: #ef4444;
+    #restart {
+      background: red;
       color: white;
     }
 
     #shop {
       margin: 15px auto;
       padding: 15px;
-      max-width: 400px;
-      background: #181824;
-      border: 2px solid #333;
+      width: 350px;
+      background: #1c1c28;
       border-radius: 12px;
     }
 
     #shop button {
-      background: #3b82f6;
+      background: #3485ff;
       color: white;
     }
 
     #message {
+      color: yellow;
       min-height: 25px;
-      color: #facc15;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>🎮 DODGE MASTER</h1>
+<h1>🎮 DODGE MASTER</h1>
 
-  <div id="info">
-    <div>⭐ Score: <span id="score">0</span></div>
-    <div>💰 Coins: <span id="coins">0</span></div>
-    <div>❤️ Lives: <span id="lives">3</span></div>
-  </div>
+<div id="info">
+  ⭐ Score: <span id="score">0</span>
+  &nbsp;&nbsp;
+  💰 Coins: <span id="coins">0</span>
+  &nbsp;&nbsp;
+  ❤️ Lives: <span id="lives">3</span>
+</div>
 
-  <canvas id="game" width="450" height="550"></canvas>
+<canvas id="game" width="450" height="550"></canvas>
 
-  <br>
+<br>
 
-  <button id="startBtn" onclick="startGame()">
-    ▶ START
-  </button>
+<button id="start" onclick="startGame()">▶ START</button>
+<button id="pause" onclick="pauseGame()">⏸ PAUSE</button>
+<button id="restart" onclick="startGame()">🔄 RESTART</button>
 
-  <button id="pauseBtn" onclick="pauseGame()">
-    ⏸ PAUSE
-  </button>
+<p id="message">Avoid the red blocks!</p>
 
-  <button id="restartBtn" onclick="startGame()">
-    🔄 RESTART
-  </button>
+<div id="shop">
 
-  <p id="message"></p>
+  <h2>🛒 SHOP</h2>
 
-  <div id="shop">
+  <p>⚡ Speed Upgrade — 50 coins</p>
+  <button onclick="buySpeed()">BUY SPEED</button>
 
-    <h2>🛒 SHOP</h2>
+  <p>❤️ Extra Life — 100 coins</p>
+  <button onclick="buyLife()">BUY LIFE</button>
 
-    <p>⚡ Speed Upgrade — 50 coins</p>
-    <button onclick="buySpeed()">
-      BUY SPEED
-    </button>
-
-    <p>❤️ Extra Life — 100 coins</p>
-    <button onclick="buyLife()">
-      BUY LIFE
-    </button>
-
-  </div>
+</div>
 
 <script>
 
@@ -130,46 +110,41 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 let player;
-let enemies;
+let enemies = [];
 
 let score = 0;
 let coins = 0;
 let lives = 3;
 
-let gameRunning = false;
+let running = false;
 let paused = false;
 
+let playerSpeed = 6;
 let enemySpeed = 3;
 let spawnRate = 0.025;
-
-let playerSpeed = 6;
 
 let highScore =
   Number(localStorage.getItem("highScore")) || 0;
 
+let keys = {};
 
-/* =========================
-   PLAYER
-========================= */
+
+/* PLAYER */
 
 function createPlayer() {
 
   player = {
     x: canvas.width / 2 - 20,
     y: canvas.height - 70,
-
     width: 40,
     height: 40,
-
     speed: playerSpeed
   };
 
 }
 
 
-/* =========================
-   START GAME
-========================= */
+/* START */
 
 function startGame() {
 
@@ -183,89 +158,67 @@ function startGame() {
   enemySpeed = 3;
   spawnRate = 0.025;
 
-  gameRunning = true;
+  running = true;
   paused = false;
 
-  document.getElementById("score").textContent = score;
-  document.getElementById("lives").textContent = lives;
+  updateInfo();
 
   document.getElementById("message").textContent =
-    "Survive as long as you can!";
+    "🔥 Survive as long as you can!";
 
   gameLoop();
+
 }
 
 
-/* =========================
-   KEYBOARD
-========================= */
+/* KEYBOARD */
 
-let keys = {};
+document.addEventListener("keydown", function(e) {
 
-document.addEventListener("keydown", function(event) {
+  keys[e.key] = true;
 
-  keys[event.key] = true;
+});
+
+document.addEventListener("keyup", function(e) {
+
+  keys[e.key] = false;
 
 });
 
 
-document.addEventListener("keyup", function(event) {
-
-  keys[event.key] = false;
-
-});
-
-
-/* =========================
-   MOVE PLAYER
-========================= */
+/* MOVE PLAYER */
 
 function movePlayer() {
 
   if (keys["ArrowLeft"] || keys["a"]) {
-
     player.x -= player.speed;
-
   }
 
   if (keys["ArrowRight"] || keys["d"]) {
-
     player.x += player.speed;
-
   }
 
-
-  // Keep player inside screen
-
   if (player.x < 0) {
-
     player.x = 0;
-
   }
 
   if (player.x + player.width > canvas.width) {
-
-    player.x =
-      canvas.width - player.width;
-
+    player.x = canvas.width - player.width;
   }
 
 }
 
 
-/* =========================
-   CREATE ENEMY
-========================= */
+/* CREATE ENEMY */
 
 function createEnemy() {
 
-  const size =
+  let size =
     Math.floor(Math.random() * 25) + 25;
 
   enemies.push({
 
-    x: Math.random() *
-      (canvas.width - size),
+    x: Math.random() * (canvas.width - size),
 
     y: -size,
 
@@ -273,22 +226,18 @@ function createEnemy() {
 
     height: size,
 
-    speed:
-      enemySpeed +
-      Math.random() * 2
+    speed: enemySpeed + Math.random() * 2
 
   });
 
 }
 
 
-/* =========================
-   DRAW PLAYER
-========================= */
+/* DRAW PLAYER */
 
 function drawPlayer() {
 
-  ctx.fillStyle = "#22c55e";
+  ctx.fillStyle = "lime";
 
   ctx.fillRect(
     player.x,
@@ -296,9 +245,6 @@ function drawPlayer() {
     player.width,
     player.height
   );
-
-
-  // Player eyes
 
   ctx.fillStyle = "black";
 
@@ -319,15 +265,13 @@ function drawPlayer() {
 }
 
 
-/* =========================
-   DRAW ENEMIES
-========================= */
+/* DRAW ENEMIES */
 
 function drawEnemies() {
 
-  for (let enemy of enemies) {
+  ctx.fillStyle = "red";
 
-    ctx.fillStyle = "#ef4444";
+  for (let enemy of enemies) {
 
     ctx.fillRect(
       enemy.x,
@@ -341,9 +285,7 @@ function drawEnemies() {
 }
 
 
-/* =========================
-   MOVE ENEMIES
-========================= */
+/* MOVE ENEMIES */
 
 function moveEnemies() {
 
@@ -353,35 +295,22 @@ function moveEnemies() {
 
     enemy.y += enemy.speed;
 
-
-    // Enemy escaped
-
     if (enemy.y > canvas.height) {
 
       enemies.splice(i, 1);
 
       score++;
-
       coins++;
 
-      document.getElementById("score")
-        .textContent = score;
-
-      document.getElementById("coins")
-        .textContent = coins;
-
-
-      // Increase difficulty
+      updateInfo();
 
       if (score % 10 === 0) {
 
         enemySpeed += 0.5;
-
         spawnRate += 0.005;
 
-        document.getElementById("message")
-          .textContent =
-          "🔥 LEVEL UP! Enemies are faster!";
+        document.getElementById("message").textContent =
+          "🔥 HARDER! The enemies are faster!";
 
       }
 
@@ -392,9 +321,7 @@ function moveEnemies() {
 }
 
 
-/* =========================
-   COLLISION
-========================= */
+/* COLLISION */
 
 function checkCollision() {
 
@@ -402,20 +329,12 @@ function checkCollision() {
 
     let enemy = enemies[i];
 
-
     if (
 
-      player.x <
-      enemy.x + enemy.width &&
-
-      player.x + player.width >
-      enemy.x &&
-
-      player.y <
-      enemy.y + enemy.height &&
-
-      player.y + player.height >
-      enemy.y
+      player.x < enemy.x + enemy.width &&
+      player.x + player.width > enemy.x &&
+      player.y < enemy.y + enemy.height &&
+      player.y + player.height > enemy.y
 
     ) {
 
@@ -423,14 +342,10 @@ function checkCollision() {
 
       lives--;
 
-      document.getElementById("lives")
-        .textContent = lives;
+      updateInfo();
 
-
-      document.getElementById("message")
-        .textContent =
-        "💥 You got hit!";
-
+      document.getElementById("message").textContent =
+        "💥 Ouch! You got hit!";
 
       if (lives <= 0) {
 
@@ -445,9 +360,7 @@ function checkCollision() {
 }
 
 
-/* =========================
-   SPAWN ENEMIES
-========================= */
+/* SPAWN */
 
 function spawnEnemies() {
 
@@ -460,68 +373,23 @@ function spawnEnemies() {
 }
 
 
-/* =========================
-   BACKGROUND
-========================= */
-
-function drawBackground() {
-
-  ctx.fillStyle = "#171722";
-
-  ctx.fillRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
-
-
-  // Small stars
-
-  ctx.fillStyle = "#333344";
-
-  for (let i = 0; i < 30; i++) {
-
-    let x =
-      (i * 73) % canvas.width;
-
-    let y =
-      (i * 127) % canvas.height;
-
-    ctx.fillRect(
-      x,
-      y,
-      2,
-      2
-    );
-
-  }
-
-}
-
-
-/* =========================
-   PAUSE
-========================= */
+/* PAUSE */
 
 function pauseGame() {
 
-  if (!gameRunning) return;
+  if (!running) return;
 
   paused = !paused;
 
-
   if (paused) {
 
-    document.getElementById("message")
-      .textContent =
-      "⏸ GAME PAUSED";
+    document.getElementById("message").textContent =
+      "⏸ PAUSED";
 
   } else {
 
-    document.getElementById("message")
-      .textContent =
-      "▶ GAME RESUMED";
+    document.getElementById("message").textContent =
+      "▶ RESUMED";
 
     gameLoop();
 
@@ -530,16 +398,11 @@ function pauseGame() {
 }
 
 
-/* =========================
-   GAME OVER
-========================= */
+/* GAME OVER */
 
 function gameOver() {
 
-  gameRunning = false;
-
-  paused = false;
-
+  running = false;
 
   if (score > highScore) {
 
@@ -552,9 +415,7 @@ function gameOver() {
 
   }
 
-
-  ctx.fillStyle =
-    "rgba(0,0,0,0.7)";
+  ctx.fillStyle = "rgba(0,0,0,0.75)";
 
   ctx.fillRect(
     0,
@@ -562,7 +423,6 @@ function gameOver() {
     canvas.width,
     canvas.height
   );
-
 
   ctx.fillStyle = "white";
 
@@ -574,7 +434,6 @@ function gameOver() {
     240
   );
 
-
   ctx.font = "25px Arial";
 
   ctx.fillText(
@@ -582,7 +441,6 @@ function gameOver() {
     170,
     290
   );
-
 
   ctx.font = "20px Arial";
 
@@ -592,16 +450,13 @@ function gameOver() {
     325
   );
 
-
-  document.getElementById("message")
-    .textContent =
+  document.getElementById("message").textContent =
     "💀 Game Over! Press RESTART.";
+
 }
 
 
-/* =========================
-   SHOP: SPEED
-========================= */
+/* SHOP: SPEED */
 
 function buySpeed() {
 
@@ -612,25 +467,17 @@ function buySpeed() {
     playerSpeed += 2;
 
     if (player) {
-
-      player.speed =
-        playerSpeed;
-
+      player.speed = playerSpeed;
     }
 
+    updateInfo();
 
-    document.getElementById("coins")
-      .textContent = coins;
-
-
-    document.getElementById("message")
-      .textContent =
-      "⚡ Speed upgraded!";
+    document.getElementById("message").textContent =
+      "⚡ SPEED UPGRADED!";
 
   } else {
 
-    document.getElementById("message")
-      .textContent =
+    document.getElementById("message").textContent =
       "❌ You need 50 coins!";
 
   }
@@ -638,9 +485,7 @@ function buySpeed() {
 }
 
 
-/* =========================
-   SHOP: EXTRA LIFE
-========================= */
+/* SHOP: LIFE */
 
 function buyLife() {
 
@@ -650,21 +495,14 @@ function buyLife() {
 
     lives++;
 
-    document.getElementById("coins")
-      .textContent = coins;
+    updateInfo();
 
-    document.getElementById("lives")
-      .textContent = lives;
-
-
-    document.getElementById("message")
-      .textContent =
-      "❤️ Extra life purchased!";
+    document.getElementById("message").textContent =
+      "❤️ EXTRA LIFE!";
 
   } else {
 
-    document.getElementById("message")
-      .textContent =
+    document.getElementById("message").textContent =
       "❌ You need 100 coins!";
 
   }
@@ -672,18 +510,34 @@ function buyLife() {
 }
 
 
-/* =========================
-   MAIN GAME LOOP
-========================= */
+/* UPDATE TEXT */
+
+function updateInfo() {
+
+  document.getElementById("score").textContent =
+    score;
+
+  document.getElementById("coins").textContent =
+    coins;
+
+  document.getElementById("lives").textContent =
+    lives;
+
+}
+
+
+/* GAME LOOP */
 
 function gameLoop() {
 
-  if (!gameRunning) return;
+  if (!running || paused) return;
 
-  if (paused) return;
-
-
-  drawBackground();
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
 
   movePlayer();
 
@@ -697,19 +551,23 @@ function gameLoop() {
 
   drawEnemies();
 
-
   requestAnimationFrame(gameLoop);
 
 }
 
 
-/* =========================
-   INITIAL SCREEN
-========================= */
+/* INITIAL SCREEN */
 
 createPlayer();
 
-drawBackground();
+ctx.fillStyle = "#222";
+
+ctx.fillRect(
+  0,
+  0,
+  canvas.width,
+  canvas.height
+);
 
 drawPlayer();
 
